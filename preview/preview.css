@@ -1,0 +1,10 @@
+@import "../app/globals.css";
+
+@source "../app";
+@source "../components";
+@source "../preview";
+
+/* next/font is not available here; Montserrat comes from Google Fonts. */
+:root {
+  --font-montserrat: "Montserrat";
+}
