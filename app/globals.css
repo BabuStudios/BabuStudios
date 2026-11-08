@@ -224,6 +224,54 @@ h3 {
   color: var(--accent-ink);
 }
 
+/* Hover reveal: a gold rule draws out from the centre under the active logo,
+   then its tagline rises in. Only once the logo itself is revealed. */
+.brand-link__reveal {
+  position: absolute;
+  top: calc(100% + 20px);
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.brand-link__rule {
+  display: block;
+  width: 56px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform var(--dur-ui) var(--ease-out-quart);
+}
+.brand-link__tagline {
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity var(--dur-ui) var(--ease-out-quart),
+    transform var(--dur-ui) var(--ease-out-quart);
+}
+.brand-link[data-active] .brand-link__rule {
+  transform: scaleX(calc(clamp(0, (var(--reveal) - 0.6) * 2.5, 1)));
+}
+.brand-link[data-active] .brand-link__tagline {
+  opacity: clamp(0, calc((var(--reveal) - 0.6) * 2.5), 1);
+  transform: none;
+  transition-delay: 80ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-link__rule,
+  .brand-link__tagline {
+    transition-duration: 1ms;
+  }
+}
+
 /* ---------- Menu bar (above the docked logo) ---------- */
 .menu-bar {
   position: fixed;
@@ -1031,6 +1079,7 @@ html[data-render="fallback"] .brand-links li:nth-child(4) {
   justify-content: center;
 }
 html[data-render="fallback"] .brand-link {
+  --reveal: 1; /* no scene to reveal the logos: always shown */
   position: relative;
   width: auto;
   height: auto;

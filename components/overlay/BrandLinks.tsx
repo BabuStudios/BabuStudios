@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { brands, hubBrandIds } from "@/content/brands";
 import { copy } from "@/content/site";
+import { worldText } from "@/content/worlds";
 import { HUB_TIMELINE } from "@/lib/hubTimeline";
 import { type HubBrandId, useExperience } from "@/store/useExperience";
 import { FlatLogo } from "./FlatLogo";
@@ -17,6 +18,10 @@ import { onWorldLinkClick } from "./worldLink";
  * Hover and focus are handled here (not by raycasting), so mouse, keyboard
  * and touch share one code path.
  *
+ * The active logo (hovered, focused, or tapped once on touch) reveals a fine
+ * gold rule and its world's tagline underneath. It is driven by the store's
+ * `hoveredBrand` rather than CSS :hover, so touch's preview tap shows it too.
+ *
  * In the static fallback there is no scene: the links drop the tracking and
  * become a plain grid of flat logos (CSS, `html[data-render="fallback"]`).
  */
@@ -24,6 +29,7 @@ export function BrandLinks() {
   const links = useRef<Partial<Record<HubBrandId, HTMLAnchorElement>>>({});
   const lastPointer = useRef("");
   const tracking = useExperience((s) => s.renderMode === "webgl");
+  const active = useExperience((s) => s.hoveredBrand);
 
   useEffect(() => {
     if (!tracking) {
@@ -55,7 +61,9 @@ export function BrandLinks() {
   const hover = (id: HubBrandId | null) => useExperience.getState().setHoveredBrand(id);
 
   const onFocus = (id: HubBrandId) => {
-    hover(id);
+    // A touch press also focuses the link (pointerdown comes first). Leave the
+    // preview to the tap itself, or the first tap would count as the second.
+    if (lastPointer.current !== "touch") hover(id);
     const { scrollProgress, scrollTo, renderMode } = useExperience.getState();
     if (renderMode === "webgl" && scrollProgress < HUB_TIMELINE.rest) scrollTo?.(HUB_TIMELINE.rest);
   };
@@ -74,7 +82,9 @@ export function BrandLinks() {
                 }}
                 href={brand.href}
                 aria-label={brand.name}
+                aria-describedby={`brand-tagline-${id}`}
                 className="brand-link"
+                data-active={active === id ? "" : undefined}
                 onPointerDown={(event) => {
                   lastPointer.current = event.pointerType;
                 }}
@@ -100,6 +110,12 @@ export function BrandLinks() {
                 {/* Real logos spell the brand name, so only placeholder marks get
                     a visible label; the link's aria-label names it either way. */}
                 {brand.placeholder && <span className="brand-link__label label-caps">{brand.label}</span>}
+                <span className="brand-link__reveal">
+                  <span className="brand-link__rule" aria-hidden="true" />
+                  <span id={`brand-tagline-${id}`} className="brand-link__tagline">
+                    {worldText(id).headline}
+                  </span>
+                </span>
               </a>
             </li>
           );

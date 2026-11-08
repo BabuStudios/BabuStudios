@@ -43,7 +43,7 @@ If an upgrade causes a peer conflict, stop and ask; never use `--force` or `--le
 
 ## Repository
 
-GitHub: https://github.com/BabuStudios/BabuStudios (public, org `BabuStudios`). `main` holds the create-next-app base; the site was pushed on branch `babu-site` with a draft PR (BabuStudios/BabuStudios#1). The GitHub token in cloud sessions cannot use GraphQL, so `gh pr create` fails: create PRs with `gh api repos/BabuStudios/BabuStudios/pulls --method POST`.
+GitHub: https://github.com/BabuStudios/BabuStudios (public, org `BabuStudios`). The site was merged into `main` via BabuStudios/BabuStudios#1; later changes go on their own branch with a draft PR. The GitHub token in cloud sessions cannot use GraphQL, so `gh pr create` fails: create PRs with `gh api repos/BabuStudios/BabuStudios/pulls --method POST`.
 
 ## Architecture rules
 
@@ -219,6 +219,13 @@ Contrast on beige: black 18.3:1, gold `#C99422` 2.4:1 (decorative only; use `ink
 - **Page worlds** are pages with no 3D logo: `pageWorldIds = ["contact", "policies"]` and `PAGE_HREFS` in `content/pages.ts`; `WorldId = "hub" | BrandId | PageWorldId`. They share `pageWorldMeta(id)` (vertical) and `worlds/pages` (empty scene, Studios palette), and routing (`worldHref`, `worldFromPath`/`Hash`), the particle tint (brands only) and the menu (`MENU_PAGES`, labels from `copy.menu`) treat them generically. To add another: extend `pageWorldIds`/`PAGE_HREFS`, `copy.menu`, add the overlay + `app/<id>/page.tsx`, `PreviewPages` and the sitemap.
 - **Policies** (`/policies`, `#policies` in the preview) shows **Babu Studios' real Privacy Policy**, copied verbatim from https://babupolicy.vercel.app/privacy/ (the page the store listings link to; last updated 27 October 2026; sections 1–11 plus an "Apps covered" table for Snakey Fruits and Kallokollen). **Keep the two in sync.** `content/policies.ts` holds it as typed rich text (`Paragraph` = string or runs of plain / `{ strong }` / `{ text, href }`, plus an optional `table`); `PoliciesOverlay` renders it in a 680 px column (external links open in a new tab), then "Also published at …" and a closing "Back to Babu" button. Its short intro is `.page-intro` (also short in the fallback). It has **no fixed BackControl**, because the column reaches the bottom of the first screen on phones. The policy's contact address is **lejonsoder@gmail.com** (as in the source), not the site's `CONTACT_EMAIL`.
 - **Menu on phones:** six items no longer fit at 390 px, so the row scrolls sideways and `MenuBar` scrolls the current item into view (the row only, never the page).
+
+## Hub choice polish (user request: "gör sidan där man väljer gren häftigare"; chose hover reveal, magnetic tilt, cinematic entrance)
+
+- **Cinematic entrance:** each flat hub logo assembles from dust as it reveals (`LogoAssembly`, `lib/sampleSurface.ts`). Motes are sampled area-weighted on each part's front caps, start in a wide shell 2–10 normalised units behind, spiral in with per-mote delays (one points draw per logo, scene fog in the shader) and dissolve as the solid logo fades in (`smoothstep(0.62, 0.92, reveal)`). Scrubbed by scroll, so it reverses. With dust the rise is only 30% (`DUST_RISE`). Counts by quality: 1600/1000/500. Off with reduced motion. Studios (the handoff slot) has no dust; it arrives as the travelling wordmark.
+- **Magnetic tilt:** every logo turns toward the pointer (yaw 0.22, pitch 0.14 rad max) and the hovered one is pulled up to 0.18 units toward it, on an inner group, so the link's hit box never moves under the pointer. Off on touch (`isCoarsePointer`) and with reduced motion.
+- **Hover reveal** (`BrandLinks`): the active logo (hover, focus, or the first touch tap) draws a gold rule under itself and its world's headline fades in (`worldText(id).headline`, also the link's `aria-describedby`). Driven by the store's `hoveredBrand` via `data-active`, gated on `--reveal`. The fallback grid shows it too (`--reveal: 1`).
+- **Touch fix:** a tap also focuses the link, and `onFocus` used to set the hover state before the click, so the first tap flew straight in. Focus caused by a touch press no longer sets the hover state.
 
 ## Content
 
