@@ -39,7 +39,11 @@ If an upgrade causes a peer conflict, stop and ask; never use `--force` or `--le
 - `npm run lint`
 - `npm run palettes`: list the colours found in each `public/brand/*.svg`
 - `npm run convert:mark`: convert every 3D logo source in `assets/source` (list: `JOBS` in `scripts/convert-mark.mjs`; `.obj` and `.usd/.usdc/.usdz` are supported) into `public/brand/*.glb` (meshes only, creased normals when missing, welded, centred, height 1). With two args it converts one file. Re-run after every new export.
-- `npm run preview:build`: build `preview/dist/index.html`, a self-contained page (same components, no Next.js) that is published as a claude.ai Artifact for review. The user reviews progress through this Artifact; there is no git remote yet.
+- `npm run preview:build`: build `preview/dist/index.html`, a self-contained page (same components, no Next.js) that is published as a claude.ai Artifact for review. The user reviews progress through this Artifact.
+
+## Repository
+
+GitHub: https://github.com/BabuStudios/BabuStudios (public, org `BabuStudios`). `main` holds the create-next-app base; the site was pushed on branch `babu-site` with a draft PR (BabuStudios/BabuStudios#1). The GitHub token in cloud sessions cannot use GraphQL, so `gh pr create` fails: create PRs with `gh api repos/BabuStudios/BabuStudios/pulls --method POST`.
 
 ## Architecture rules
 
