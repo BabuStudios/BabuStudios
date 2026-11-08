@@ -168,6 +168,7 @@ Contrast on beige: black 18.3:1, gold `#C99422` 2.4:1 (decorative only; use `ink
 
 ## Hub choice layout (user request: Studios wordmark above Entertainment)
 
+- **Studios sits a little higher** in the landscape row (user request "lyft babu studios textloggan något"): `arc.studios.y` is 0.45 vs 0.3 for Life and Business (≈ 20 px above them at 1280×800). The travelling wordmark and the fly-in read the same placement. The portrait stack is unchanged.
 - The hub's choice composition has **four** brands (`hubBrandIds` in `content/brands.ts`, reading/tab/reveal order): **Life, Studios, Business on one line, Entertainment centred below**. On phones it is a stack: Studios, Life, Entertainment, Business. Placements are keyed by brand in `SUB_BRAND_LAYOUT.arc` / `.stack` (`worlds/hub/meta.ts`, `hubBrandRestPosition`), all at the same depth so every "Babu" renders at the same size.
 - **Studios appears as its 3D wordmark without the B** (`babu-studios-wordmark-3d.glb`), drawn **fully flat** (`flatness = 1`, no reflections) so it matches the flat SVG siblings' black, at the mean sub-brand wordmark height on the shared scale. On hover it mutes through emissive (`setMarkMute`). The B stays in the header.
 - The store's `anchors`, `BrandLinks` and the `TransitionDirector` all use `HubBrandId` (four brands). **Flying into Studios from the hub now aims at the Studios wordmark in the row** (like the others), also when the header B is clicked, and the return reverse-portals out of it. The old header "portal" effect is gone.
