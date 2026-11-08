@@ -1,26 +1,1218 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
+/*
+ * --bg / --fg are set inline on <html> from content/brands.ts (theme).
+ * The fallbacks below only apply if that inline style is missing.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f2efe9;
+  --fg: #000000;
+
+  /*
+   * Motion tokens (Phase 5 timing pass). Everything eases; nothing is linear
+   * or bouncy. Three curves only:
+   *   out-expo      entrances and reveals (fast in, long weightless settle)
+   *   out-quart     micro-interactions (hover, focus, colour, size)
+   *   in-out-quart  loops and travelling things (scroll cue)
+   * Durations: micro 300 ms and ui 400 ms (brief: 200–400 ms), enter 900 ms
+   * (loader/menu/cue fades), reveal 1000 ms (sections). The 3D timings live
+   * in code: lib/flight.ts, lib/hubTimeline.ts, lib/alive.ts.
+   */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.18, 1);
+  --dur-micro: 300ms;
+  --dur-ui: 400ms;
+  --dur-enter: 900ms;
+  --dur-reveal: 1000ms;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-kerning: normal;
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1;
+  text-rendering: optimizeLegibility;
+}
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  text-wrap: balance;
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, var(--bg));
+  color: var(--fg);
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+}
+
+/* Eyebrows and labels: Montserrat 300, uppercase, wide tracking. */
+.label-caps {
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  /* Tracking adds trailing space after the last letter; pull it back so the
+     label stays optically centred. */
+  margin-right: -0.35em;
+}
+
+/* ---------- Loader (Beat 0) ---------- */
+.loader {
+  transition: opacity var(--dur-enter) var(--ease-out-expo);
+}
+.loader--leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+.loader__track {
+  position: relative;
+  display: block;
+  width: 160px;
+  height: 1px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--fg) 12%, transparent);
+}
+.loader__line {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* ---------- Scroll cue ---------- */
+.scroll-cue {
+  position: fixed;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: max(32px, calc(env(safe-area-inset-bottom, 0px) + 20px));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity var(--dur-enter) var(--ease-out-expo),
+    transform var(--dur-enter) var(--ease-out-expo);
+}
+.scroll-cue--visible {
+  opacity: 1;
+  transform: none;
+  transition-delay: 1.4s;
+}
+.scroll-cue__line {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 44px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--fg) 14%, transparent);
+}
+.scroll-cue__line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: translateY(-100%);
+  animation: scroll-cue-travel 2.6s var(--ease-in-out-quart) infinite;
+}
+@keyframes scroll-cue-travel {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue__line::after {
+    animation: none;
+    transform: none;
+    opacity: 0.6;
+  }
+  .loader,
+  .scroll-cue {
+    transition-duration: 200ms;
+  }
+}
+
+/* ---------- Docked header logo (3D → DOM hand-off) ---------- */
+/* Position/size come inline from lib/dock.ts; opacity crossfades with the 3D logo. */
+.docked-logo {
+  position: fixed;
+  left: 50%;
+  z-index: 40;
+  display: block;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms var(--ease-out-quart);
+}
+.docked-logo--docked {
+  opacity: 1;
+  pointer-events: auto;
+}
+.docked-logo:focus-visible {
+  opacity: 1;
+  outline: 1px solid var(--accent-ink);
+  outline-offset: 8px;
+}
+
+/* ---------- Sub-brand links (track the 3D logos) ---------- */
+.brand-links {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+.brand-links ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.brand-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 0;
+  height: 0;
+  color: var(--fg);
+  text-decoration: none;
+  will-change: transform;
+  --reveal: 0;
+}
+.brand-link:focus-visible {
+  outline: 1px solid var(--accent-ink);
+  outline-offset: 12px;
+}
+.brand-link__label {
+  position: absolute;
+  top: calc(100% + 18px);
+  left: 50%;
+  font-size: 11px;
+  white-space: nowrap;
+  /* The label follows the reveal, starting once the logo is half way in. */
+  opacity: clamp(0, calc((var(--reveal) - 0.5) * 2), 1);
+  transform: translateX(-50%);
+  transition: color var(--dur-micro) var(--ease-out-quart);
+}
+.brand-link:hover .brand-link__label,
+.brand-link:focus-visible .brand-link__label {
+  color: var(--accent-ink);
+}
+
+/* ---------- Menu bar (above the docked logo) ---------- */
+.menu-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 45;
+  padding-top: max(28px, env(safe-area-inset-top, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity var(--dur-enter) var(--ease-out-expo),
+    transform var(--dur-enter) var(--ease-out-expo);
+}
+.menu-bar--visible {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.6s;
+}
+.menu-bar__list {
+  display: flex;
+  justify-content: center;
+  gap: clamp(18px, 3.2vw, 44px);
+  margin: 0;
+  padding: 0 0 6px;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.menu-bar__list::-webkit-scrollbar {
+  display: none;
+}
+.menu-bar__link {
+  position: relative;
+  display: block;
+  /* A comfortable hit area (≥ 24 px, WCAG 2.5.8) without changing the layout:
+     the padding is cancelled by negative margins. */
+  margin: -6px -8px;
+  padding: 12px 8px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--dur-micro) var(--ease-out-quart);
+}
+.menu-bar__link::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: calc(8px + 0.35em); /* the trailing letter-spacing is not part of the word */
+  bottom: 6px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-ui) var(--ease-out-quart);
+}
+.menu-bar__link:hover,
+.menu-bar__link:focus-visible,
+.menu-bar__link[aria-current="page"] {
+  color: var(--fg);
+}
+.menu-bar__link:hover::after,
+.menu-bar__link:focus-visible::after,
+.menu-bar__link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+.menu-bar__link:focus-visible {
+  outline: 1px solid var(--accent-ink);
+  outline-offset: 6px;
+}
+@media (max-width: 639px) {
+  .menu-bar {
+    padding-top: max(18px, env(safe-area-inset-top, 0px));
+  }
+  .menu-bar__list {
+    justify-content: flex-start;
+    gap: 16px;
+  }
+  /* The docked Studios logo directly below is the same link. */
+  .menu-bar__item--studios {
+    display: none;
+  }
+  .menu-bar__list > li:nth-child(2) {
+    margin-left: auto;
+  }
+  .menu-bar__list > li:last-child {
+    margin-right: auto;
+  }
+  .menu-bar__link {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    margin-right: calc(-8px - 0.2em);
+  }
+}
+
+/* ---------- Fly transitions ---------- */
+/* World content fades out when a flight starts and back in once it lands;
+   the header (menu, docked logo) stays. */
+.world-content {
+  transition: opacity 500ms var(--ease-out-quart);
+}
+.world-content[data-flying] {
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: 250ms;
+}
+
+/* ---------- Brand world (Phase 3 template) ---------- */
+.world-intro {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding-block: 0 clamp(120px, 18vh, 180px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  text-align: center;
+  pointer-events: none;
+}
+.world-intro__eyebrow {
+  margin: 0;
+  font-size: 11px;
+  color: var(--accent-ink);
+}
+.world-intro__headline {
+  margin: 0;
+  max-width: 18ch;
+  font-size: clamp(28px, 4.2vw, 52px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.world-intro__lede {
+  margin: 0;
+  max-width: 44ch;
+  font-size: clamp(14px, 1.2vw, 16px);
+  font-weight: 300;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  text-wrap: pretty;
+}
+
+.back-control {
+  position: fixed;
+  left: max(24px, calc(env(safe-area-inset-left, 0px) + 16px));
+  bottom: max(28px, calc(env(safe-area-inset-bottom, 0px) + 18px));
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding-block: 8px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  text-decoration: none;
+  transition: color var(--dur-micro) var(--ease-out-quart);
+}
+.back-control__line {
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  transform-origin: right center;
+  transition: transform var(--dur-ui) var(--ease-out-quart);
+}
+.back-control:hover,
+.back-control:focus-visible {
+  color: var(--fg);
+}
+.back-control:hover .back-control__line,
+.back-control:focus-visible .back-control__line {
+  transform: scaleX(1.5);
+}
+.back-control:focus-visible {
+  outline: 1px solid var(--accent-ink);
+  outline-offset: 6px;
+}
+@media (max-width: 639px) {
+  .back-control {
+    left: max(16px, env(safe-area-inset-left, 0px));
+  }
+  /* On phones the Back control and the scroll cue would share the bottom
+     edge; inside brand worlds the control wins. */
+  .scroll-cue--world {
+    display: none;
+  }
+}
+
+/* ---------- Header in vertical worlds ---------- */
+.docked-logo {
+  transition:
+    opacity 150ms var(--ease-out-quart),
+    top var(--dur-ui) var(--ease-out-quart),
+    height var(--dur-ui) var(--ease-out-quart),
+    width var(--dur-ui) var(--ease-out-quart);
+}
+.header-scrim {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 38;
+  height: 148px; /* compact logo bottom (72 + 52) + 24 px of fade */
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) 68%,
+    color-mix(in srgb, var(--bg) 0%, transparent) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-out-quart);
+}
+.header-scrim--visible {
+  opacity: 1;
+}
+@media (max-width: 639px) {
+  .header-scrim {
+    height: 114px; /* 50 + 44 + 20 */
+  }
+}
+
+/* ---------- Vertical brand world page ---------- */
+.world-intro--flow {
+  position: relative;
+  inset: auto;
+}
+.world-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: 1080px;
+  margin-inline: auto;
+  padding-block: clamp(96px, 14vh, 160px);
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+  text-align: center;
+}
+.world-section__eyebrow {
+  margin: 0;
+  font-size: 11px;
+  color: var(--accent-ink);
+}
+.world-section__title {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(26px, 3.2vw, 40px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.world-section__text {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  text-wrap: pretty;
+}
+.world-section__apps {
+  display: grid;
+  gap: 32px;
+  width: 100%;
+  margin-top: 18px;
+}
+.world-section--teaser {
+  border-top: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+}
+.world-section--outro {
+  padding-bottom: clamp(140px, 22vh, 220px);
+}
+.outro-link {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 14px 26px;
+  border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  font-size: 11px;
+  color: var(--fg);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-micro) var(--ease-out-quart),
+    background-color var(--dur-micro) var(--ease-out-quart);
+}
+.outro-link:hover,
+.outro-link:focus-visible {
+  border-color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+/* App card */
+.app-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--fg) 9%, transparent);
+  background: color-mix(in srgb, var(--bg) 55%, #ffffff);
+  text-align: left;
+}
+@media (min-width: 768px) {
+  .app-card {
+    grid-template-columns: 1.1fr 1fr;
+  }
+}
+.app-card__media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 11;
+  max-width: 100%;
+  background:
+    radial-gradient(120% 90% at 20% 15%, color-mix(in srgb, var(--accent) 26%, var(--bg)), transparent 60%),
+    linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, var(--bg)), var(--bg));
+}
+/* Real artwork: plain beige behind it (the brand gradient is for placeholders only). */
+.app-card__media--image {
+  background: var(--bg);
+}
+.app-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform var(--dur-reveal) var(--ease-out-expo);
+}
+.app-card:hover .app-card__image {
+  transform: scale(1.03);
+}
+.app-card__monogram {
+  font-size: clamp(64px, 9vw, 120px);
+  font-weight: 300;
+  line-height: 1;
+  color: color-mix(in srgb, var(--accent-ink) 55%, transparent);
+}
+.app-card__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+  padding: clamp(28px, 4vw, 56px);
+}
+.app-card__name {
+  margin: 0;
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.app-card__tagline {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+}
+.app-card__text {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+}
+.app-card__stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.store-link {
+  display: inline-block;
+  padding: 11px 18px;
+  border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  font-size: 10px;
+  color: var(--fg);
+  text-decoration: none;
+  transition: border-color var(--dur-micro) var(--ease-out-quart);
+}
+.store-link:hover,
+.store-link:focus-visible,
+.outro-link:focus-visible {
+  border-color: var(--fg);
+  outline-offset: 4px;
+}
+.app-card__status {
+  margin: 10px 0 0;
+  font-size: 10px;
+  color: var(--accent-ink);
+}
+.back-control {
+  transition:
+    color var(--dur-micro) var(--ease-out-quart),
+    opacity var(--dur-ui) var(--ease-out-quart);
+}
+.back-control--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Studios corridor (DOM panels along Z) ---------- */
+/* Position, scale, opacity and blur are set every frame from the 3D projection. */
+.corridor {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  overflow: hidden;
+}
+.corridor-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(540px, 86vw);
+  opacity: 0; /* until the first frame places it */
+  transform-origin: 50% 50%;
+}
+.corridor-panel--intro {
+  align-items: center;
+  width: min(720px, 90vw);
+  text-align: center;
+}
+.corridor-panel--work,
+.corridor-panel--process {
+  align-items: center;
+  width: min(980px, 90vw);
+  text-align: center;
+}
+.corridor-panel--contact {
+  align-items: center;
+  width: min(640px, 88vw);
+  text-align: center;
+}
+.corridor-eyebrow {
+  margin: 0;
+  font-size: 11px;
+  color: var(--accent-ink);
+}
+.corridor-title {
+  margin: 0;
+  font-size: clamp(28px, 3.4vw, 44px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.corridor-title--large {
+  font-size: clamp(30px, 4.2vw, 54px);
+  max-width: 16ch;
+}
+.corridor-text {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  text-wrap: pretty;
+}
+.corridor-points {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.corridor-points li {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-size: 14px;
+  font-weight: 400;
+}
+.corridor-points li::before {
+  content: "";
+  flex: none;
+  width: 18px;
+  height: 1px;
+  background: var(--accent);
+  transform: translateY(-4px);
+}
+.corridor-note {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--fg) 55%, transparent);
+}
+.corridor-email {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  user-select: all;
+}
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.work-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.work-card__media {
+  aspect-ratio: 4 / 3;
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+  background:
+    radial-gradient(110% 80% at 30% 20%, color-mix(in srgb, var(--accent) 24%, var(--bg)), transparent 62%),
+    linear-gradient(
+      170deg,
+      color-mix(in srgb, var(--accent) 10%, var(--bg)),
+      color-mix(in srgb, var(--fg) 4%, var(--bg))
+    );
+}
+.work-card__kind {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: var(--accent-ink);
+}
+.work-card__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+  width: 100%;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.process-step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+}
+.process-step__index {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+.process-step__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+.process-step__body {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+}
+
+@media (max-width: 639px) {
+  .work-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  /* Compact rows on phones: a small tile beside the text. */
+  .work-card {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    column-gap: 14px;
+    align-items: center;
+  }
+  .work-card__media {
+    grid-row: span 2;
+    aspect-ratio: 1;
+  }
+  .work-card__kind {
+    margin: 0;
+  }
+  .process-steps {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+}
+
+/* ---------- Vertical worlds: sections ease in as they enter the viewport ---------- */
+.world-section__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+.reveal {
+  transition:
+    opacity var(--dur-reveal) var(--ease-out-expo),
+    transform var(--dur-reveal) var(--ease-out-expo);
+}
+.reveal--armed:not(.reveal--in) {
+  opacity: 0;
+  transform: translateY(28px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal--armed:not(.reveal--in) {
+    transform: none;
+  }
+  .reveal {
+    transition-duration: var(--dur-micro);
+  }
+}
+
+/* ---------- Film grain + vignette (Phase 5 post FX) ---------- */
+/*
+ * One fixed layer over everything (canvas AND DOM), so the beige DOM surfaces
+ * (header scrim, panels) and the WebGL background stay identical: a
+ * canvas-only vignette would leave seams. Grain ≤ 4% (brief) as a tiled
+ * noise image that jitters by transform (compositor only, no repaints).
+ */
+.film {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  overflow: hidden;
+}
+.film__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 100% at 50% 45%, transparent 58%, rgba(0, 0, 0, 0.045) 100%);
+}
+.film__grain {
+  position: absolute;
+  inset: -64px;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  animation: film-grain 0.9s steps(6) infinite;
+}
+@keyframes film-grain {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  17% {
+    transform: translate3d(-23px, 14px, 0);
+  }
+  33% {
+    transform: translate3d(31px, -19px, 0);
+  }
+  50% {
+    transform: translate3d(-12px, -33px, 0);
+  }
+  67% {
+    transform: translate3d(19px, 27px, 0);
+  }
+  83% {
+    transform: translate3d(-34px, 6px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film__grain {
+    animation: none;
+  }
+}
+
+/* ---------- Micro-interactions ---------- */
+.app-card,
+.work-card__media {
+  transition:
+    border-color var(--dur-ui) var(--ease-out-quart),
+    transform var(--dur-ui) var(--ease-out-quart),
+    box-shadow var(--dur-ui) var(--ease-out-quart);
+}
+.app-card:hover {
+  border-color: color-mix(in srgb, var(--fg) 18%, transparent);
+  box-shadow: 0 18px 40px -28px color-mix(in srgb, var(--fg) 35%, transparent);
+}
+.app-card__media {
+  overflow: hidden;
+}
+.app-card__monogram {
+  transition: transform var(--dur-reveal) var(--ease-out-expo);
+}
+.app-card:hover .app-card__monogram {
+  transform: scale(1.06);
+}
+.work-card:hover .work-card__media {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  transform: translateY(-4px);
+}
+.store-link,
+.outro-link {
+  position: relative;
+  overflow: hidden;
+}
+.store-link:hover,
+.outro-link:hover {
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+}
+.store-link:active,
+.outro-link:active {
+  transform: scale(0.98);
+}
+
+/* ---------- Skip link (first tab stop) ---------- */
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: max(16px, env(safe-area-inset-left, 0px));
+  z-index: 80;
+  padding: 10px 16px;
+  font-size: 11px;
+  color: var(--fg);
+  text-decoration: none;
+  background: var(--bg);
+  border: 1px solid var(--accent-ink);
+  transform: translateY(calc(-100% - 24px));
+  transition: transform var(--dur-micro) var(--ease-out-quart);
+}
+.skip-link:focus {
+  transform: none;
+  outline: none;
+}
+
+/* ---------- Static fallback (no WebGL) ---------- */
+/* html[data-render="fallback"]: every page becomes a plain, normally scrolling
+   document with flat SVG wordmarks where the 3D logos would be. */
+html:not([data-render="fallback"]) .flat-logo {
+  display: none;
+}
+.flat-logo {
+  display: block;
+  width: auto;
+  height: var(--flat-logo-h, 80px);
+}
+html[data-render="fallback"] .hub-main,
+html[data-render="fallback"] .depth-main {
+  height: auto !important;
+}
+html[data-render="fallback"] .scroll-cue {
+  display: none;
+}
+
+/* Hub: the intro, then the brand family (Life · Studios · Business, Entertainment below). */
+html[data-render="fallback"] .hub-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(48px, 8vh, 88px);
+  min-height: 100dvh;
+  padding: 220px max(16px, env(safe-area-inset-right, 0px)) 120px max(16px, env(safe-area-inset-left, 0px));
+}
+html[data-render="fallback"] .hub-intro {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+  max-width: 34rem;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.7;
+  text-align: center;
+  text-wrap: balance;
+}
+html[data-render="fallback"] .brand-links {
+  position: static;
+  width: 100%;
+  pointer-events: auto;
+}
+html[data-render="fallback"] .brand-links ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(32px, 6vh, 64px) clamp(40px, 6vw, 96px);
+}
+/* Entertainment on its own line, centred below the other three. */
+html[data-render="fallback"] .brand-links li:nth-child(4) {
+  display: flex;
+  flex-basis: 100%;
+  justify-content: center;
+}
+html[data-render="fallback"] .brand-link {
+  position: relative;
+  width: auto;
+  height: auto;
+  padding: 8px;
+  transition:
+    transform var(--dur-ui) var(--ease-out-quart),
+    opacity var(--dur-ui) var(--ease-out-quart);
+  --flat-logo-h: clamp(52px, 6.5vw, 92px);
+}
+/* The 3D hover in miniature: the chosen logo lifts, the others recede. */
+html[data-render="fallback"] .brand-link:hover,
+html[data-render="fallback"] .brand-link:focus-visible {
+  transform: translateY(-4px);
+}
+html[data-render="fallback"] .brand-links ul:has(.brand-link:hover) .brand-link:not(:hover) {
+  opacity: 0.45;
+}
+@media (max-width: 639px) {
+  html[data-render="fallback"] .hub-main {
+    padding-top: 170px;
+  }
+  /* Phones: one column, Studios first (as in the 3D stack). */
+  html[data-render="fallback"] .brand-links ul {
+    flex-direction: column;
+  }
+  html[data-render="fallback"] .brand-links li:nth-child(2) {
+    order: -1;
+  }
+  html[data-render="fallback"] .brand-links li:nth-child(3) {
+    order: 1;
+  }
+  html[data-render="fallback"] .brand-link {
+    --flat-logo-h: 64px;
+  }
+}
+
+/* Brand worlds: the flat logo sits where the 3D hero logo floats. */
+.flat-logo--hero {
+  --flat-logo-h: clamp(64px, 13vh, 124px);
+  margin-bottom: 18px;
+}
+html[data-render="fallback"] .world-intro--flow {
+  height: auto;
+  min-height: 85dvh;
+  justify-content: center;
+  padding-top: 200px;
+  padding-bottom: 80px;
+}
+
+/* Studios: the corridor's panels become an ordinary page. */
+html[data-render="fallback"] .corridor {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(96px, 14vh, 160px);
+  padding: 220px 0 140px;
+  overflow: visible;
+  pointer-events: auto;
+}
+html[data-render="fallback"] .corridor-panel {
+  position: static;
+  opacity: 1;
+}
+
+/* ---------- Contact page ---------- */
+/* A vertical world with no hero logo: the content is centred on the screen. */
+.world-intro--centered {
+  justify-content: center;
+  padding-block: 180px 120px;
+}
+.contact-intro {
+  pointer-events: auto;
+}
+.contact-intro__headline {
+  max-width: 16ch;
+}
+@media (max-width: 639px) {
+  .world-intro--centered {
+    padding-block: 140px 96px;
+  }
+}
+
+/* ---------- Policies page ---------- */
+/* A short intro (not a full screen), then a readable single column. */
+.page-intro {
+  height: auto;
+  justify-content: flex-start;
+  padding-block: 220px 64px;
+  pointer-events: auto;
+}
+.policies {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: min(680px, 100%);
+  margin: 0 auto;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) clamp(140px, 22vh, 220px)
+    max(16px, env(safe-area-inset-left, 0px));
+}
+.policy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 32px;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+}
+.policy__title {
+  margin: 0;
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 500;
+}
+.policy__text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.75;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  text-wrap: pretty;
+}
+.policy--lead {
+  padding-top: 0;
+  border-top: 0;
+}
+.policy__text strong {
+  font-weight: 500;
+  color: var(--fg);
+}
+.policy__text a,
+.policies__updated a {
+  color: var(--fg);
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+}
+.policy__table-wrap {
+  overflow-x: auto;
+}
+.policy__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.55;
+  text-align: left;
+}
+.policy__table th,
+.policy__table td {
+  padding: 12px 14px 12px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  vertical-align: top;
+}
+.policy__table thead th {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+.policy__table tbody th {
+  font-weight: 500;
+  white-space: nowrap;
+}
+.policy__table td {
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+}
+.policies__updated {
+  margin: 0;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--fg) 60%, transparent);
+}
+.policies__back {
+  align-self: center;
+  margin-top: 24px;
+}
+@media (max-width: 639px) {
+  .page-intro {
+    padding-top: 160px;
+  }
+}
+/* The fallback gives flowing intros most of a screen; the Policies intro stays short. */
+html[data-render="fallback"] .page-intro {
+  min-height: 0;
+  justify-content: flex-start;
+  padding-bottom: 64px;
 }
