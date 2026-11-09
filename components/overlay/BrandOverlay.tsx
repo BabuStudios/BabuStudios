@@ -10,6 +10,7 @@ import { ScrollCue } from "./ScrollCue";
 import { FlatLogo } from "./FlatLogo";
 import { FlyLink } from "./FlyLink";
 import { Reveal } from "./Reveal";
+import { LifeCorridor } from "./life/LifeCorridor";
 import { StudiosCorridor } from "./studios/StudiosCorridor";
 
 function Intro({ id, flow }: { id: BrandId; flow: boolean }) {
@@ -30,10 +31,10 @@ function Intro({ id, flow }: { id: BrandId; flow: boolean }) {
  * DOM layer of a brand world. The brand's logo floats in WebGL on the content
  * plane, just above the intro.
  *
- * - Vertical worlds (Life, Entertainment, Business): a normal scrolling page,
+ * - Vertical worlds (Entertainment, Business): a normal scrolling page,
  *   whose content defines the height; the camera follows the page 1:1.
  * - Depth worlds (Studios): the main element's height is the corridor's
- *   scroll length; the sections float along Z (StudiosCorridor).
+ *   scroll length; the sections float along Z (StudiosCorridor, LifeCorridor).
  */
 export function BrandOverlay({ id }: { id: BrandId }) {
   const meta = brandWorldMeta(id);
@@ -75,7 +76,7 @@ export function BrandOverlay({ id }: { id: BrandId }) {
       ) : (
         // `depth-main`: the static fallback drops the scroll length (the page flows).
         <main id="main" className="depth-main" style={{ height: `${meta.zLength * SCROLL_VH_PER_UNIT}vh` }}>
-          {id === "studios" ? <StudiosCorridor /> : <Intro id={id} flow={false} />}
+          {id === "studios" ? <StudiosCorridor /> : id === "life" ? <LifeCorridor /> : <Intro id={id} flow={false} />}
         </main>
       )}
       <BackControl />

@@ -23,7 +23,7 @@ export interface AppCard {
   status?: string;
 }
 
-/** The scrolling page of a vertical world (Life, Entertainment, Business). */
+/** A brand world's page content: a vertical page (Entertainment, Business) or Life's corridor panels. */
 export interface WorldPage {
   appsLabel: string;
   apps: AppCard[];

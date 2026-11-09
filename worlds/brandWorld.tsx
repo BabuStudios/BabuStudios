@@ -14,7 +14,8 @@ import { assetUrl } from "@/lib/assets";
 import { CAMERA_FOV } from "@/lib/scene";
 import { getLogoGeometry } from "@/lib/svgToMesh";
 import { brandWorldMeta, CONTENT_PLANE_DISTANCE } from "./brandMeta";
-import { SectionProjector } from "./studios/SectionProjector";
+import { isCorridorWorld } from "./corridors";
+import { SectionProjector } from "./SectionProjector";
 import type { WorldDefinition } from "./types";
 
 /** The hero logo sits on the world's content plane. */
@@ -109,7 +110,7 @@ function BrandWorldScene({ id }: { id: BrandId }) {
       <group position={[0, 0, HERO_Z]}>
         {studiosWordmark ? <StudiosWordmarkHero url={assetUrl(studiosWordmark)} /> : <WordmarkHero id={id} />}
       </group>
-      {id === "studios" && <SectionProjector />}
+      {isCorridorWorld(id) && <SectionProjector corridor={id} />}
     </>
   );
 }
