@@ -18,7 +18,9 @@ export interface AliveParams {
 
 export const defaultAlive: AliveParams = {
   period: 5.2,
-  amplitude: 0.055,
+  // No vertical float (user request: "ta bort att dom svävar upp och ned").
+  // Was 0.055. The breath and the turn toward the cursor remain.
+  amplitude: 0,
   breath: 0.008,
   phase: 0,
 };

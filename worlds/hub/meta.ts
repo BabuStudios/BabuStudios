@@ -37,7 +37,9 @@ export const SUB_BRAND_LAYOUT = {
    */
   arc: {
     life: { x: -2.7, y: 0.3, z: -10.9 },
-    studios: { x: 0, y: 0.3, z: -10.9 },
+    // Raised a little above its neighbours (user request: "lyft babu studios
+    // textloggan något"); at y 0.3 it read slightly low in perspective.
+    studios: { x: 0, y: 0.45, z: -10.9 },
     business: { x: 2.7, y: 0.3, z: -10.9 },
     entertainment: { x: 0, y: -0.95, z: -10.9 },
   } satisfies Record<HubBrandId, Placement>,

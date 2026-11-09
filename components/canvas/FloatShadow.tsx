@@ -64,8 +64,9 @@ export function FloatShadow({ y, width, params = defaultAlive, opacity = 0.11, s
     const mesh = ref.current;
     if (!mesh) return;
     const { reducedMotion } = useExperience.getState();
-    // lift: -1 at the bottom of the float, +1 at the top.
-    const lift = reducedMotion ? 0 : floatOffset(state.clock.elapsedTime, params) / params.amplitude;
+    // lift: -1 at the bottom of the float, +1 at the top (0 with no float).
+    const lift =
+      reducedMotion || params.amplitude === 0 ? 0 : floatOffset(state.clock.elapsedTime, params) / params.amplitude;
     const amount = strength?.() ?? 1;
     mesh.visible = amount > 0.001;
     (mesh.material as MeshBasicMaterial).opacity = opacity * (1 - lift * 0.22) * amount;
