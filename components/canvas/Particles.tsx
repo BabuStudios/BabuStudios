@@ -40,8 +40,19 @@ function particleTints(): Array<[Color, number, number, number]> {
 
 const background = new Color(theme.background);
 
-function buildGeometry(count: number): InstancedBufferGeometry {
+/**
+ * Gold flecks (user request: "den lilla guldpartikeln, gör fler"): extra motes
+ * on top of the regular dust (`extra` × its count) that are clearly gold,
+ * barely mixed toward the background and a little larger, so they read as
+ * small gold specks. The regular field is unchanged.
+ */
+const GOLD_FLECKS = { extra: 0.4, minMix: 0.04, maxMix: 0.2, minSize: 0.05, sizeRange: 0.04 };
+const gold = new Color(brands.studios.palette.primary);
+
+function buildGeometry(dust: number): InstancedBufferGeometry {
   const random = createRandom(1337);
+  // The regular dust first, then the gold flecks.
+  const count = dust + Math.round(dust * GOLD_FLECKS.extra);
   const tints = particleTints();
   const totalWeight = tints.reduce((sum, [, w]) => sum + w, 0);
   const { x, y, zNear, zFar } = HUB.particleVolume;
@@ -60,10 +71,16 @@ function buildGeometry(count: number): InstancedBufferGeometry {
     seeds[i * 4 + 1] = 0.08 + random() * 0.14;
     seeds[i * 4 + 2] = 0.022 + Math.pow(random(), 2.2) * 0.07;
 
-    let pick = random() * totalWeight;
-    const tint = tints.find(([, weight]) => (pick -= weight) <= 0) ?? tints[0];
-    const [base, , minMix, maxMix] = tint;
-    color.copy(base).lerp(background, MathUtils.lerp(minMix, maxMix, random()));
+    if (i >= dust) {
+      const { minMix, maxMix, minSize, sizeRange } = GOLD_FLECKS;
+      color.copy(gold).lerp(background, MathUtils.lerp(minMix, maxMix, random()));
+      seeds[i * 4 + 2] = minSize + random() * sizeRange;
+    } else {
+      let pick = random() * totalWeight;
+      const tint = tints.find(([, weight]) => (pick -= weight) <= 0) ?? tints[0];
+      const [base, , minMix, maxMix] = tint;
+      color.copy(base).lerp(background, MathUtils.lerp(minMix, maxMix, random()));
+    }
     colors.set([color.r, color.g, color.b], i * 3);
   }
 
