@@ -657,6 +657,51 @@ h3 {
   width: min(980px, 90vw);
   text-align: center;
 }
+/* Life: an app card per panel, as wide as the card needs. */
+.corridor-panel--app {
+  align-items: stretch;
+  width: min(920px, 90vw);
+}
+.corridor-panel--app > .corridor-eyebrow {
+  text-align: center;
+}
+/* Phones: a corridor panel must fit one screen (it floats in place, it does
+   not scroll), so the card is narrower, its art shorter and its type tighter. */
+@media (max-width: 639px) {
+  html[data-render="webgl"] .corridor-panel--app {
+    gap: 10px;
+    width: 76vw;
+  }
+  html[data-render="webgl"] .corridor-panel--app .app-card__media {
+    aspect-ratio: 16 / 7;
+  }
+  html[data-render="webgl"] .corridor-panel--app .app-card__body {
+    gap: 8px;
+    padding: 18px;
+  }
+  html[data-render="webgl"] .corridor-panel--app .app-card__name {
+    font-size: 20px;
+  }
+  html[data-render="webgl"] .corridor-panel--app .app-card__tagline {
+    font-size: 13px;
+  }
+  html[data-render="webgl"] .corridor-panel--app .app-card__text {
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  html[data-render="webgl"] .corridor-panel--app .app-card__stores {
+    margin-top: 4px;
+  }
+  /* The label would sit on the header B; kept for screen readers (it is the h2). */
+  html[data-render="webgl"] .corridor-panel--app > .corridor-eyebrow {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
 .corridor-panel--contact {
   align-items: center;
   width: min(640px, 88vw);

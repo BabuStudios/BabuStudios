@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import type { PerspectiveCamera } from "three";
 import { Vector3 } from "three";
 import { useExperience } from "@/store/useExperience";
-import { STUDIOS_SECTIONS } from "./sections";
+import { CORRIDORS, type CorridorWorld } from "./corridors";
 
 const world = new Vector3();
 const view = new Vector3();
@@ -14,12 +14,12 @@ const view = new Vector3();
  * publishes it (store `sectionFrames`, mutated in place). The DOM panels read
  * these to place, scale, fade and blur themselves (lib/focus.ts).
  */
-export function SectionProjector() {
+export function SectionProjector({ corridor }: { corridor: CorridorWorld }) {
   useFrame((state) => {
     const camera = state.camera as PerspectiveCamera;
     const { sectionFrames } = useExperience.getState();
     const portrait = state.size.width / state.size.height < 0.85;
-    for (const s of STUDIOS_SECTIONS) {
+    for (const s of CORRIDORS[corridor]) {
       world.set(portrait ? 0 : s.x, s.y, s.z);
       view.copy(world).applyMatrix4(camera.matrixWorldInverse);
       world.project(camera);

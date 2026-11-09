@@ -5,6 +5,7 @@
 import type { BrandId } from "@/content/brands";
 import { type PageWorldId, pageWorldIds } from "@/content/pages";
 import type { WorldId } from "@/store/useExperience";
+import { corridorMeta, isCorridorWorld } from "./corridors";
 import type { WorldMeta } from "./types";
 
 /**
@@ -16,12 +17,11 @@ import type { WorldMeta } from "./types";
 export const CONTENT_PLANE_DISTANCE = 4;
 
 /**
- * Life, Entertainment and Business are normal vertically scrolling pages once
- * you have flown in (user decision), and so are the page worlds (Contact,
- * Policies). Studios keeps the
- * depth corridor.
+ * Entertainment and Business are normal vertically scrolling pages once you
+ * have flown in (user decision), and so are the page worlds (Contact,
+ * Policies). Studios and Life are depth corridors (worlds/corridors.ts).
  */
-const VERTICAL_WORLDS: readonly WorldId[] = ["life", "entertainment", "business", ...pageWorldIds];
+const VERTICAL_WORLDS: readonly WorldId[] = ["entertainment", "business", ...pageWorldIds];
 
 /** The entry pose of a vertical world (only the first point is used). */
 const VERTICAL_PATH: WorldMeta["cameraPath"] = [
@@ -32,23 +32,7 @@ const VERTICAL_PATH: WorldMeta["cameraPath"] = [
 ];
 
 export function brandWorldMeta(id: BrandId): WorldMeta {
-  if (id === "studios") {
-    return {
-      id,
-      scrollMode: "depth",
-      // The corridor (worlds/studios/sections.ts): panels every 8 units to
-      // z = -36 (Process); the path ends 4.5 units in front of the last one.
-      // The small x/y offsets give the long dolly a slow organic sway.
-      zLength: 32,
-      cameraPath: [
-        [0, 0, 0],
-        [0.12, 0.05, -8],
-        [-0.12, 0.1, -16],
-        [0.1, 0.05, -24],
-        [0, 0, -31.5],
-      ],
-    };
-  }
+  if (isCorridorWorld(id)) return { id, ...corridorMeta(id) };
   return {
     id,
     scrollMode: VERTICAL_WORLDS.includes(id) ? "vertical" : "depth",
