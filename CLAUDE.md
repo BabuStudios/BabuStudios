@@ -43,7 +43,7 @@ If an upgrade causes a peer conflict, stop and ask; never use `--force` or `--le
 
 ## Repository
 
-GitHub: https://github.com/BabuStudios/BabuStudios (public, org `BabuStudios`). `main` holds the create-next-app base; the site was pushed on branch `babu-site` with a draft PR (BabuStudios/BabuStudios#1). The GitHub token in cloud sessions cannot use GraphQL, so `gh pr create` fails: create PRs with `gh api repos/BabuStudios/BabuStudios/pulls --method POST`.
+GitHub: https://github.com/BabuStudios/BabuStudios (public, org `BabuStudios`). The site was merged into `main` via BabuStudios/BabuStudios#1; later changes go on their own branch with a draft PR. Vercel deploys `main` to production (project babu-studios); the babupolicy project only builds previews from this repo. The GitHub token in cloud sessions cannot use GraphQL, so `gh pr create` fails: create PRs with `gh api repos/BabuStudios/BabuStudios/pulls --method POST`.
 
 ## Architecture rules
 
@@ -155,6 +155,7 @@ Contrast on beige: black 18.3:1, gold `#C99422` 2.4:1 (decorative only; use `ink
 
 - **Life, Entertainment and Business scroll as normal pages** once you have flown in ("vill inte ha Z scroll längre utan standard upp och ner scroll"). **Studios and the hub keep depth (Z) scroll.** `WorldMeta.scrollMode` is `"depth" | "vertical"`, set in `worlds/brandMeta.ts` (`VERTICAL_WORLDS`, `isVerticalWorld`).
 - **Vertical camera:** `CameraRig` moves the camera straight down 1:1 with the page. One CSS px of scroll equals `2·d·tan(fov/2) / viewportHeight` world units at the content plane `CONTENT_PLANE_DISTANCE` (4, where the hero logo sits), with no extra damping, so the 3D logo stays locked to the DOM text (Lenis still smooths the scroll itself). The store publishes `scrollY` (px) next to `scrollProgress` (`setScroll`).
+- **Gold flecks** (user request: "den lilla guldpartikeln, gör fler"): on top of the regular dust, `GOLD_FLECKS.extra` (40%) more motes are clearly gold (mixed only 4–20% toward the background) and a little larger (0.05–0.09), so many more small gold specks show. The regular field is unchanged (`components/canvas/Particles.tsx`).
 - **Particles** wrap vertically around the camera in the shader (`uCameraY`, `uHalfHeight`). The volume is now ±12 high, so the wrap seam lies past depth ~29 inside the fog, and the counts were raised to keep the density (1300/760/380).
 - **Vertical page (DOM, `BrandOverlay`):** intro (100dvh, 3D logo above the headline), then the app card(s) (`AppCardView`: tinted placeholder media with a monogram, name, tagline, text, App Store / Google Play links as `#`, or a status such as "In development"), a teaser ("Next") and an outro with a "Back to Babu" button (`FlyLink`). All copy is in `content/worlds.ts` (`page`) and `content/site.ts` (`stores`). The page height comes from the content.
 - **Compact header:** in vertical worlds, after 24 px of scroll (`useCompactHeader`), the docked logo shrinks (`compactDockMetrics`: desktop top 72, height 52; phones top 50, height 44), a beige `HeaderScrim` fades in behind the header, and the fixed `BackControl` fades out (the header logo and the outro link lead back).
