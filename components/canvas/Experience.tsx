@@ -8,7 +8,6 @@ import { dprRange, stepQuality } from "@/lib/quality";
 import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR, FOG_DENSITY } from "@/lib/scene";
 import { useExperience } from "@/store/useExperience";
 import { CameraRig } from "./CameraRig";
-import { Particles } from "./Particles";
 import { LoadProgressSignal, ReadySignal } from "./SceneSignals";
 import { SectionScroller } from "./SectionScroller";
 import { StudioEnvironment } from "./StudioEnvironment";
@@ -66,7 +65,6 @@ export default function Experience({ eventSource, onContextLost }: ExperiencePro
         <WorldManager />
         <ReadySignal />
       </Suspense>
-      <Particles />
       <TransitionVeil />
     </Canvas>
   );

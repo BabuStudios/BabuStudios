@@ -94,7 +94,6 @@ export function TransitionDirector() {
       flight.position.lerpVectors(L.from, L.to, e);
       flight.lookAt.lerpVectors(L.lookFrom, L.lookTo, e);
       flight.fov = CAMERA_FOV + FLIGHT.fovPush * e;
-      flight.streak = e;
       flight.veil = reduced ? t : smoothstep(0.6, 1, t);
 
       if (t >= 1) {
@@ -115,13 +114,11 @@ export function TransitionDirector() {
     flight.position.lerpVectors(L.from, L.to, e);
     flight.lookAt.lerpVectors(L.lookFrom, L.lookTo, e);
     flight.fov = CAMERA_FOV + FLIGHT.fovPush * (1 - e);
-    flight.streak = 1 - e;
     flight.veil = reduced ? 1 - t : 1 - smoothstep(0, 0.5, t);
 
     if (t >= 1) {
       flight.active = false;
       flight.veil = 0;
-      flight.streak = 0;
       phase.current = null;
       store.endTransition();
     }

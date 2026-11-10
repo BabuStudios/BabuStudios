@@ -5,7 +5,7 @@ import { Vector3 } from "three";
  *
  *   departure  the camera accelerates (ease-in cubic) toward the chosen logo
  *              and through it like a portal; leaving a brand world it pulls
- *              back instead. FOV pushes 45° → 60°, particles streak.
+ *              back instead. FOV pushes 45° → 60°.
  *   ── swap ── under a full beige veil: the world changes, scroll resets,
  *              the camera is re-placed for the arrival.
  *   arrival    the camera decelerates (ease-out quart) into the new world's
@@ -33,7 +33,7 @@ export const FLIGHT = {
 
 /**
  * The current flight, written by TransitionDirector every frame and read by
- * CameraRig, Particles and TransitionVeil. Mutated in place (no allocations
+ * CameraRig and TransitionVeil. Mutated in place (no allocations
  * per frame, no React updates).
  */
 export const flight = {
@@ -44,6 +44,4 @@ export const flight = {
   fov: 45,
   /** 0..1 beige veil over the scene. */
   veil: 0,
-  /** 0..1 particle motion streaks. */
-  streak: 0,
 };
