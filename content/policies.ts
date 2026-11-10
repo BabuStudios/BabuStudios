@@ -29,7 +29,12 @@ export interface PolicySection {
 export interface PolicyDocument {
   /** Stable id. */
   id: string;
+  /** The button's title in the menu. */
   title: string;
+  /** The open policy's h1, when it differs from the button title. */
+  headline?: string;
+  /** Not yet reviewed and approved: shown with a visible "Draft" tag. */
+  draft?: boolean;
   /** One line under the title in the menu. */
   summary: string;
   updated: string;
@@ -52,6 +57,8 @@ export interface PoliciesCopy {
   /** Back from a policy to the menu. */
   back: string;
   updatedLabel: string;
+  /** Tag on a policy that is still a draft. */
+  draftLabel: string;
   documents: PolicyDocument[];
 }
 
@@ -69,6 +76,7 @@ export const policiesCopy: Record<Locale, PoliciesCopy> = {
     open: "Read",
     back: "All policies",
     updatedLabel: "Last updated",
+    draftLabel: "Draft",
     documents: [
       {
         id: "privacy",
@@ -193,6 +201,121 @@ export const policiesCopy: Record<Locale, PoliciesCopy> = {
           text: "babupolicy.vercel.app/privacy",
           href: "https://babupolicy.vercel.app/privacy/",
         },
+      },
+      {
+        // DRAFT written from what The Promptery's code and its setup notes
+        // (supabase/SETUP.md, ATT-GORA-FORE-PUBLICERING.md in BabuStudios/ThePromptery)
+        // say it stores. It must be reviewed and approved by Babu before it is
+        // treated as final; then remove `draft` and set `updated`.
+        id: "the-promptery",
+        title: "The Promptery",
+        headline: "The Promptery Privacy Policy",
+        draft: true,
+        summary: "What The Promptery stores when you read, sign in, post and send messages.",
+        updated: "Draft, not yet published",
+        sections: [
+          {
+            id: "promptery-scope",
+            title: "",
+            paragraphs: [
+              [
+                "This Privacy Policy applies to The Promptery, the website at ",
+                { text: "thepromtery.vercel.app", href: "https://thepromtery.vercel.app" },
+                ". The Promptery is run by Babu Studios, a sole proprietorship (enskild firma) owned by Fredrik Lejon Söder, who is responsible for how your data is handled.",
+              ],
+            ],
+          },
+          {
+            id: "promptery-visiting",
+            title: "1. Reading without an account",
+            paragraphs: [
+              "You can read the news, guides, glossary and prompts without an account. We do not ask for any personal information to do so.",
+              "Your progress in the guides is saved in your own browser, on your device. It is not sent to us.",
+              "We count visits with Vercel Web Analytics. It does not use cookies and does not build a profile of you.",
+            ],
+          },
+          {
+            id: "promptery-account",
+            title: "2. Your account",
+            paragraphs: [
+              "You can sign in with Google or with a link sent to your email address. With Google we receive your name, email address and profile picture. With an email link we receive your email address.",
+              "When you join you choose a username, whether you are a private person or a business (with a company name), and a profile picture (a photo you upload, your Google photo or an emoji). You can also add a headline, bio, location, website, links to LinkedIn, X and GitHub, the AI tools you use and your interests. Your profile, username and what you add to it are shown to other visitors.",
+            ],
+          },
+          {
+            id: "promptery-posts",
+            title: "3. What you post",
+            paragraphs: [
+              "Posts, comments, prompts, polls, reactions, ratings and the people you follow are stored in our database. Posts, comments, prompts and reactions are public on the site.",
+              "Pictures you add to a post are made smaller in your browser and stored with the post. They are public, like the post. You can delete your own pictures, and they are removed when the post is removed or when you delete your account.",
+              "Items you save are kept in a private list that only you can see.",
+            ],
+          },
+          {
+            id: "promptery-messages",
+            title: "4. Direct messages",
+            paragraphs: [
+              "Direct messages and any pictures in them are stored in our database. Only the two members of a conversation can read them, not even moderators. Pictures in direct messages are kept in private storage and shown through links that expire after an hour.",
+              "You can block a member, after which they cannot send you more messages. Messages and the pictures you have sent are removed when you delete your account.",
+            ],
+          },
+          {
+            id: "promptery-newsletter",
+            title: "5. Newsletter",
+            paragraphs: [
+              "If you subscribe to the weekly newsletter, we store your email address to send it to you. We use it for nothing else. You can unsubscribe at any time, and your signup is removed when you delete your account.",
+            ],
+          },
+          {
+            id: "promptery-moderation",
+            title: "6. Moderation and safety",
+            paragraphs: [
+              "To keep the community safe, there are limits on how much can be posted, and members can report content. Moderators can remove content and suspend members for a period. The reason for a suspension is only visible to moderators.",
+            ],
+          },
+          {
+            id: "promptery-providers",
+            title: "7. Who processes your data",
+            paragraphs: [
+              "We use Supabase for the database, sign-in and stored pictures, and Vercel to host the site and count visits. If you sign in with Google, Google handles that sign-in. An email service sends sign-in links and, once it starts, the newsletter. These providers only process data as needed to provide their services. We do not sell personal information.",
+            ],
+          },
+          {
+            id: "promptery-retention",
+            title: "8. How long we keep it and how to delete it",
+            paragraphs: [
+              "We keep your data for as long as you have an account. You can delete your account at the bottom of your own profile. That removes your sign-in, your profile and everything you have written: posts, replies, prompts, comments, reactions, your newsletter signup, and the pictures you have uploaded or sent.",
+            ],
+          },
+          {
+            id: "promptery-rights",
+            title: "9. Your rights",
+            paragraphs: [
+              [
+                "You can ask to see, correct or delete personal data we hold about you by emailing us. You can also complain to the Swedish Authority for Privacy Protection, ",
+                { text: "IMY", href: "https://www.imy.se" },
+                ".",
+              ],
+            ],
+          },
+          {
+            id: "promptery-children",
+            title: "10. Children",
+            paragraphs: [
+              "The Promptery is not directed at children under 13, and we do not knowingly collect personal information from children.",
+            ],
+          },
+          {
+            id: "promptery-changes",
+            title: "11. Changes",
+            paragraphs: ["This policy may be updated from time to time. Changes will be posted on this page."],
+          },
+          {
+            id: "promptery-contact",
+            title: "12. Contact",
+            paragraphs: ["Fredrik Lejon Söder (Babu Studios)", ["Email: ", { text: EMAIL, href: `mailto:${EMAIL}` }]],
+          },
+        ],
       },
     ],
   },

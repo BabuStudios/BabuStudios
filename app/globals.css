@@ -1331,6 +1331,19 @@ html[data-render="fallback"] .corridor-panel {
     margin-top: 6px;
   }
 }
+/* A policy that is not yet approved. */
+.policy-draft {
+  display: inline-block;
+  margin: 0 0 0 12px;
+  padding: 3px 8px 3px 10px;
+  font-size: 9px;
+  vertical-align: middle;
+  color: var(--accent-ink);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.page-intro > .policy-draft {
+  margin: 0;
+}
 /* Back from a policy to the menu. */
 .policy-back {
   align-self: center;

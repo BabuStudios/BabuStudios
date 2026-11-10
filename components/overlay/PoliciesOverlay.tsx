@@ -131,8 +131,9 @@ export function PoliciesOverlay() {
         )}
         <p className="corridor-eyebrow label-caps">{doc ? t.title : t.eyebrow}</p>
         <h1 ref={heading} tabIndex={-1} className="world-intro__headline policy-heading">
-          {doc ? doc.title : t.headline}
+          {doc ? (doc.headline ?? doc.title) : t.headline}
         </h1>
+        {doc?.draft && <p className="policy-draft label-caps">{t.draftLabel}</p>}
         <p className="world-intro__lede">{doc ? `${t.updatedLabel}: ${doc.updated}` : t.intro}</p>
       </section>
       <div className="policies">
@@ -144,7 +145,10 @@ export function PoliciesOverlay() {
               {t.documents.map((d) => (
                 <li key={d.id}>
                   <button type="button" className="policy-menu__item" onClick={() => show(d.id)}>
-                    <span className="policy-menu__title">{d.title}</span>
+                    <span className="policy-menu__title">
+                      {d.title}
+                      {d.draft && <span className="policy-draft label-caps">{t.draftLabel}</span>}
+                    </span>
                     <span className="policy-menu__summary">{d.summary}</span>
                     <span className="policy-menu__meta label-caps">
                       {t.updatedLabel}: {d.updated}
