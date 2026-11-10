@@ -1246,6 +1246,116 @@ html[data-render="fallback"] .corridor-panel {
   font-size: 10px;
   color: color-mix(in srgb, var(--fg) 60%, transparent);
 }
+/* Policies menu: one quiet card-like button per policy. */
+.policy-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.policy-menu__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 8px 24px;
+  width: 100%;
+  padding: 28px 30px;
+  font: inherit;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--bg) 55%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  transition:
+    border-color var(--dur-ui) var(--ease-out-quart),
+    box-shadow var(--dur-ui) var(--ease-out-quart),
+    transform var(--dur-ui) var(--ease-out-quart);
+}
+.policy-menu__item:hover,
+.policy-menu__item:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 18px 40px -28px color-mix(in srgb, var(--fg) 35%, transparent);
+  transform: translateY(-2px);
+}
+.policy-menu__item:focus-visible {
+  outline: 1px solid var(--accent-ink);
+  outline-offset: 4px;
+}
+.policy-menu__item:active {
+  transform: scale(0.99);
+}
+.policy-menu__title {
+  grid-column: 1;
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 500;
+}
+.policy-menu__summary {
+  grid-column: 1;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+}
+.policy-menu__meta {
+  grid-column: 1;
+  margin-top: 6px;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--fg) 60%, transparent);
+}
+.policy-menu__cta {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  font-size: 11px;
+  color: var(--accent-ink);
+  white-space: nowrap;
+}
+.policy-menu__arrow {
+  display: inline-block;
+  transition: transform var(--dur-ui) var(--ease-out-quart);
+}
+.policy-menu__item:hover .policy-menu__arrow,
+.policy-menu__item:focus-visible .policy-menu__arrow {
+  transform: translateX(4px);
+}
+@media (max-width: 639px) {
+  .policy-menu__item {
+    grid-template-columns: 1fr;
+    padding: 22px 20px;
+  }
+  .policy-menu__cta {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 6px;
+  }
+}
+/* Back from a policy to the menu. */
+.policy-back {
+  align-self: center;
+  margin-bottom: 6px;
+  padding: 10px 4px;
+  font-family: inherit;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  transition: color var(--dur-micro) var(--ease-out-quart);
+}
+.policy-back:hover,
+.policy-back:focus-visible {
+  color: var(--fg);
+}
+.policy-back:focus-visible {
+  outline: 1px solid var(--accent-ink);
+  outline-offset: 4px;
+}
+/* The heading takes focus when the view changes; no ring on it. */
+.policy-heading:focus {
+  outline: none;
+}
 .policies__back {
   align-self: center;
   margin-top: 24px;
