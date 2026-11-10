@@ -5,8 +5,7 @@ import type { WorldDefinition } from "../types";
 
 /**
  * Page worlds (Contact, Policies) have no 3D object of their own: the page is
- * all DOM text over the shared beige space and its drifting particles
- * (rendered by Experience).
+ * all DOM text over the shared beige space.
  */
 function EmptyScene() {
   return null;

@@ -16,10 +16,6 @@ export const HUB = {
   logoZ: -4,
   /** How far behind its rest position the logo starts its entrance. */
   entranceDepth: 2.6,
-  /** Particle volume: half-width, half-height, and depth along -Z. */
-  // y ±12: particles wrap vertically around the camera (vertical worlds), and
-  // ±12 puts the wrap seam past depth ~29, where fog has hidden them (8%).
-  particleVolume: { x: 11, y: 12, zNear: 1.5, zFar: -48 },
 } as const;
 
 /**

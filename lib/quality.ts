@@ -1,17 +1,14 @@
 export type Quality = "high" | "medium" | "low";
 
 export interface QualityPreset {
-  /** Instanced dust motes in the active world. */
-  particles: number;
   /** Upper bound of the device pixel ratio. */
   maxDpr: number;
 }
 
 export const qualityPresets: Record<Quality, QualityPreset> = {
-  // Counts scaled with the taller particle volume (±12 instead of ±7) to keep the density.
-  high: { particles: 1300, maxDpr: 2 },
-  medium: { particles: 760, maxDpr: 1.5 },
-  low: { particles: 380, maxDpr: 1 },
+  high: { maxDpr: 2 },
+  medium: { maxDpr: 1.5 },
+  low: { maxDpr: 1 },
 };
 
 const ladder: readonly Quality[] = ["low", "medium", "high"];
